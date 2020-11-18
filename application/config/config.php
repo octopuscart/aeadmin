@@ -25,10 +25,10 @@ $islocal = false;
 
 if (strpos($baselink, '192.168')) {
     $islocal = true;
-    $baselinkmain = 'http://' . $baselinkurl . '/maharajaadmin';
+    $baselinkmain = 'http://' . $baselinkurl . '/aeadmin';
 } elseif (strpos($baselink, 'localhost')) {
     $islocal = true;
-    $baselinkmain = 'http://' . $baselinkurl . '/maharajaadmin';
+    $baselinkmain = 'http://' . $baselinkurl . '/aeadmin';
 } else {
     $baselinkmain = 'https://' . $baselinkurl . '/';
 }
