@@ -106,28 +106,38 @@ class Api extends REST_Controller {
         $cartjson = json_decode($cartdata);
 
 
-
         $web_order = array(
             'name' => $this->post('name'),
             'email' => $this->post('email'),
             'contact_no' => $this->post('contact_no'),
-            'address' => $this->post('address'),
-            'pincode' => $this->post('pincode'),
-            'order_date' => date("Y-m-d"),
-            'order_time' => date("H:i:s a"),
-            'total_quantity' => $this->post('quantity'),
+            'user_id' => $this->post('user_id') ? $this->post('user_id') : 'Guest',
+            'zipcode' => "",
+            'address1' => $this->post('address'),
+            'address2' => "",
+            'city' => "",
+            'state' => "",
+            'country' => "",
+            'order_date' => date('Y-m-d'),
+            'order_time' => date('H:i:s'),
+            'amount_in_word' => $this->post('total'),
+            'sub_total_price' => $this->post('total'),
             'total_price' => $this->post('total'),
-            'payment_mode' => $this->post('payment_method'),
-            'status' => "Processing",
-            'user_id' => $this->post('user_id') ? $this->post('user_id') :'Guest',
-            'order_key' => $this->post('user_id') ? $this->post('user_id') :'Guest',
+            'total_quantity' => $this->post('quantity'),
+            'shipping_price' => "",
+            'status' => 'Order Confirmed',
+            'payment_mode' => "Cash on delivery",
+            'measurement_style' => '',
+            'credit_price' => 0,
         );
+
+
+       
         $this->db->insert('user_order', $web_order);
 
         $last_id = $this->db->insert_id();
         $oderid = $last_id;
 
-        $orderno = "JL" . date('Y/m/d') . "/" . $last_id;
+        $orderno = "AM" . date('Y/m/d') . "/" . $last_id;
         $orderkey = md5($orderno);
         $this->db->set('order_no', $orderno);
         $this->db->set('order_key', $orderkey);
@@ -139,7 +149,7 @@ class Api extends REST_Controller {
             'c_time' => date('H:i:s'),
             'order_id' => $last_id,
             'status' => "Order Confirmed",
-            'user_id' => $this->post('user_id') ? $this->post('user_id') :'Guest',
+            'user_id' => $this->post('user_id') ? $this->post('user_id') : 'Guest',
             'remark' => "Order Confirmed By Using COD,  Waiting For Payment",
         );
         $this->db->insert('user_order_status', $order_status_data);
@@ -294,7 +304,7 @@ class Api extends REST_Controller {
 
     function category_get() {
         $cats = [65, 67, 69, 70, 71, 73];
-        $cats = [1,2,3,4,5,6,7,8];
+        $cats = [1, 2, 3, 4, 5, 6, 7, 8];
         $this->config->load('rest', TRUE);
         $this->db->where("parent_id=0");
         $query = $this->db->get("category");
