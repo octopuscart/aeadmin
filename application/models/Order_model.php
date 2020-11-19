@@ -153,25 +153,14 @@ class Order_model extends CI_Model {
             $query = $this->db->get('cart');
             $cart_items = $query->result();
 
-            $this->db->order_by('display_index', 'asc');
-            $this->db->where('order_id', $order_details->id);
-            $query = $this->db->get('custom_measurement');
-            $custom_measurement = $query->result_array();
 
-            $order_data['measurements_items'] = $custom_measurement;
+            $order_data['measurements_items'] = array();
 
             foreach ($cart_items as $key => $value) {
                 $cart_id = $value->id;
 
-                $this->db->where('cart_id', $cart_id);
-                $query = $this->db->get('cart_customization');
-                $cartcustom = $query->result_array();
-
-                $customdata = array();
-                foreach ($cartcustom as $key1 => $value1) {
-                    $customdata[$value1['style_key']] = $value1['style_value'];
-                }
-                $value->custom_dict = $customdata;
+               
+                $value->custom_dict = array();
 
 //                $this->db->where('order_id', $order_id);
 //                $this->db->where('vendor_id', $vendor_id);
