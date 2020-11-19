@@ -467,7 +467,7 @@ class CMS extends CI_Controller {
 
             $this->db->where('id', 1);
             $this->db->update('configuration_site', $blogArray);
-            redirect("CMS/siteConfigUpdate");
+            redirect("CMS/siteSEOConfigUpdate");
         }
 
         $this->load->view('configuration/site_update', $data);
