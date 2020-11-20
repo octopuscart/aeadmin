@@ -8,6 +8,7 @@ class Api extends REST_Controller {
     public function __construct() {
         parent::__construct();
         $this->load->model('Product_model');
+        $this->load->model('Order_model');
         $this->load->library('session');
         $this->checklogin = $this->session->userdata('logged_in');
         $this->user_id = $this->session->userdata('logged_in')['login_id'];
@@ -119,11 +120,11 @@ class Api extends REST_Controller {
             'country' => "",
             'order_date' => date('Y-m-d'),
             'order_time' => date('H:i:s'),
-            'amount_in_word' => $this->post('total'),
-            'sub_total_price' => $this->post('total'),
+            'amount_in_word' => $this->Order_model->convert_num_word($this->post('total')),
+            'sub_total_price' => $this->post('sub_total'),
             'total_price' => $this->post('total'),
             'total_quantity' => $this->post('quantity'),
-            'shipping_price' => "",
+            'shipping_price' => "30",
             'status' => 'Order Confirmed',
             'payment_mode' => "Cash on delivery",
             'measurement_style' => '',
@@ -131,7 +132,7 @@ class Api extends REST_Controller {
         );
 
 
-       
+
         $this->db->insert('user_order', $web_order);
 
         $last_id = $this->db->insert_id();
@@ -201,6 +202,39 @@ class Api extends REST_Controller {
         $userdata = $query->row();
         if ($userdata) {
             $this->response(array("status" => "already", "userdata" => ""));
+        } else {
+            $this->db->insert('app_user', $regArray);
+            $this->response(array("status" => "done", "userdata" => $regArray));
+        }
+    }
+
+    function registrationMob_post() {
+        $this->config->load('rest', TRUE);
+        header('Access-Control-Allow-Origin: *');
+        header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, DELETE");
+        $name = $this->post('name');
+        $contact_no = $this->post('contact_no');
+        $usercode = rand(10000000, 99999999);
+        $regArray = array(
+            "name" => $name,
+            "email" => "",
+            "contact_no" => $contact_no,
+            "password" => $usercode,
+            "usercode" => $usercode,
+            "datetime" => date("Y-m-d H:i:s a")
+        );
+        $this->db->where('contact_no', $contact_no);
+        $query = $this->db->get('app_user');
+        $userdata = $query->row();
+        if ($userdata) {
+            $profiledata = array(
+                'name' => $this->post('name'),
+                'contact_no' => $this->post('contact_no'),
+            );
+            $this->db->set($profiledata);
+            $this->db->where('contact_no', $contact_no); //set column_name and value in which row need to update
+            $this->db->update("app_user");
+            $this->response(array("status" => "already", "userdata" => $userdata));
         } else {
             $this->db->insert('app_user', $regArray);
             $this->response(array("status" => "done", "userdata" => $regArray));
@@ -294,6 +328,12 @@ class Api extends REST_Controller {
         $query = $this->db->get("cart");
         $cartdata = $query->result_array();
         $orderdetails['cart_data'] = $cartdata;
+
+        $this->db->order_by('id', 'desc');
+        $this->db->where('order_id', $order_id);
+        $query = $this->db->get('user_order_status');
+        $userorderstatus = $query->result();
+        $orderdetails['order_status'] = $userorderstatus;
 
 
         $this->response($orderdetails);
@@ -431,6 +471,16 @@ class Api extends REST_Controller {
         );
 
         $this->db->insert('web_enquiry', $enquiry);
+    }
+
+    function shippingAmt_get() {
+        $this->config->load('rest', TRUE);
+        header('Access-Control-Allow-Origin: *');
+        header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, DELETE");
+        $this->db->where("attr_key", 'static_shipping_price');
+        $query = $this->db->get("configuration_attr");
+        $shippingprice = $query->row();
+        $this->response($shippingprice);
     }
 
     function paymentInstamojo_get() {
