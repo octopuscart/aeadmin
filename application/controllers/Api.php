@@ -266,18 +266,18 @@ class Api extends REST_Controller {
         $this->config->load('rest', TRUE);
         header('Access-Control-Allow-Origin: *');
         header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, DELETE");
-        $email = $this->post('email');
+        $contact_no = $this->post('contact_no');
         $profiledata = array(
             'name' => $this->post('name'),
             'email' => $this->post('email'),
             'contact_no' => $this->post('contact_no'),
         );
         $this->db->set($profiledata);
-        $this->db->where('email', $email); //set column_name and value in which row need to update
+        $this->db->where('contact_no', $contact_no); //set column_name and value in which row need to update
         $this->db->update("app_user");
         $this->db->order_by('name asc');
 
-        $this->db->where('email', $email); //set column_name and value in which row need to update
+        $this->db->where('contact_no', $contact_no); //set column_name and value in which row need to update
         $query = $this->db->get('app_user');
         $userData = $query->row();
         $this->response(array("userdata" => $userData));
