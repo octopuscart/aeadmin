@@ -49,8 +49,8 @@ class Order extends CI_Controller {
         $date2 = date('Y-m-d');
 
         $data = array();
-        $blog_data = $this->Curd_model->get('style_tips', 'desc');
-        $data['blog_data'] = $blog_data;
+       
+        $data['blog_data'] = array();
 
         $this->db->order_by('id', 'desc');
         $this->db->where('order_date between "' . $date1 . '" and "' . $date2 . '"');
