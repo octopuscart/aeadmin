@@ -515,6 +515,116 @@ class Api extends REST_Controller {
         $this->response($response);
     }
 
+    //new ecome api
+
+    function getProductBySerialNo_get($serial_no, $plumber_id) {
+        $this->db->where("serial_no", $serial_no);
+        $query = $this->db->get('product_stock');
+        $serial_obj = $query->row_array();
+        if ($serial_obj) {
+            $this->db->where("id", $serial_obj["product_id"]);
+            $query = $this->db->get('products');
+            $productobj = $query->row_array();
+            $imageurl = base_url() . "assets/default/default.png";
+            if ($productobj) {
+                if ($productobj['file_name']) {
+                    $imageurl = base_url() . "assets/product_images/" . $productobj['file_name'];
+                }
+                $productobj['file_name'] = $imageurl;
+                $this->db->where("serial_no", $serial_no);
+                $query = $this->db->get('product_rewards');
+                $serial_objcheck = $query->row_array();
+                if ($serial_objcheck) {
+                    $this->response(array(
+                        "status" => "300",
+                        "message" => "Product already has been used."
+                    ));
+                } else {
+                    $credit_points = $productobj['credit_limit'];
+                    $reward_array = array(
+                        "plumber_id" => $plumber_id,
+                        "product_id" => $productobj["id"],
+                        "serial_no" => $serial_no,
+                        "stock_id" => $serial_obj["id"],
+                        "points" => $credit_points,
+                        "points_type" => "Credit",
+                        "date" => Date("Y-m-d"),
+                        "time" => Date("H:m:s A"),
+                    );
+                    $this->db->insert("product_rewards", $reward_array);
+
+                    $this->response(array(
+                        "status" => "200",
+                        "message" => "$credit_points reward points have been credited in your account",
+                        "product_info" => $productobj
+                    ));
+                }
+            } else {
+                $this->response(array("status" => "404", "message" => "Invalid Product, Please try again"));
+            }
+        } else {
+            $this->response(array("status" => "404", "message" => "Invalid Product, Please try again"));
+        }
+    }
+
+    //Ecome setup
+    function getCategoryList_get() {
+        $result = $this->db->where('parent_id', '0')->get('category')->result_array();
+        $limit = count($result);
+        $limit1 = ((int) ($limit / 9));
+        $limit2 = $limit % 9;
+        $sublimit = $limit2 ? 9 - $limit2 : 0;
+        $flimit = $limit + $sublimit;
+        $rangelimit = range(0, $flimit, 9);
+        $resultdata = [];
+        foreach ($result as $key => $value) {
+            $tempdata = array();
+            $tempdata["title"] = $value["category_name"];
+            $tempdata["image"] = $value["image"] ? base_url() . "assets/media/" . $value["image"] : base_url() . "assets/default/default.png";
+            $tempdata["category_name"] = $value["category_name"];
+            $tempdata["category_id"] = $value["id"];
+            $sub_category = $this->db->get_where('category', array('parent_id' => $value["id"]))->result_array();
+            $tempdata["sub_category"] = $sub_category;
+            $tempsubcat = [];
+            foreach ($sub_category as $sbkey => $sbvalue) {
+                array_push($tempsubcat, $sbvalue["category_name"]);
+            }
+            $tempdata["sub_category_str"] = implode(", ", $tempsubcat);
+            array_push($resultdata, $tempdata);
+        }
+        $this->response($resultdata);
+    }
+
+    function getProductsList_get($category_id, $limit = 20, $startpage = 0) {
+        $categoriesString = $this->Product_model->stringCategories($category_id) . ", " . $category_id;
+        $categoriesString = ltrim($categoriesString, ", ");
+        $product_query = "select pt.id as product_id,  ct.category_name, pt.*
+            from products as pt 
+            join category as ct on ct.id = pt.category_id 
+            where pt.category_id in ($categoriesString) and variant_product_of = ''  order by id
+              limit $startpage, $limit";
+        $product_result = $this->Product_model->query_exe($product_query);
+        $finallist = [];
+        foreach ($product_result as $key => $value) {
+            $productobj = $value;
+            $imageurl = base_url() . "assets/default/default.png";
+            if ($productobj['file_name']) {
+                $imageurl = base_url() . "assets/product_images/" . $productobj['file_name'];
+            }
+            $productobj["image"] = $imageurl;
+            $category = $this->Product_model->parent_get($productobj["category_id"]);
+            if ($category) {
+                $productobj["category_nav"] = $category["category_string"];
+            }
+
+            $productobj["price"] = "INR " . number_format($productobj["price"], 2, '.', '');
+
+            array_push($finallist, $productobj);
+        }
+
+        $this->response($finallist);
+    }
+
 }
 
 ?>
