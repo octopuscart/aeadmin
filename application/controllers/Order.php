@@ -43,7 +43,7 @@ class Order extends CI_Controller {
         return $date_list_data;
     }
 
-    public function index() {
+    public function index() { 
 
         $date1 = date('Y-m-') . "01";
         $date2 = date('Y-m-d');
