@@ -474,9 +474,10 @@ class LoyaltyApi extends REST_Controller {
         $this->db->delete('post_files');
     }
 
-    function getPostData_get() {
+    function getPostData_get( $limit = 20, $startpage = 0) {
         $imagepath = base_url() . "assets/postfiles/";
         $this->db->order_by("id desc");
+        $this->db->limit($limit, $startpage);
         $query = $this->db->get('post');
         $postdata = $query->result();
         $postdataarray = array();
@@ -486,6 +487,8 @@ class LoyaltyApi extends REST_Controller {
             $this->db->order_by("id desc");
             $query = $this->db->get('post_files');
             $images = $query->result();
+            
+            
             $postimages = array();
 
             $queryr = "SELECT pl.datetime, ap.name  as name FROM `post_like` as pl  join app_user as ap on ap.id = pl.user_id"
