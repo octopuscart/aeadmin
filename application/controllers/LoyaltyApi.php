@@ -474,7 +474,7 @@ class LoyaltyApi extends REST_Controller {
         $this->db->delete('post_files');
     }
 
-    function getPostData_get( $limit = 20, $startpage = 0) {
+    function getPostData_get($limit = 20, $startpage = 0) {
         $imagepath = base_url() . "assets/postfiles/";
         $this->db->order_by("id desc");
         $this->db->limit($limit, $startpage);
@@ -486,9 +486,9 @@ class LoyaltyApi extends REST_Controller {
             $this->db->where("table_id", $value->id);
             $this->db->order_by("id desc");
             $query = $this->db->get('post_files');
-            $images = $query->result();
-            
-            
+            $images = $query->row();
+
+
             $postimages = array();
 
             $queryr = "SELECT pl.datetime, ap.name  as name FROM `post_like` as pl  join app_user as ap on ap.id = pl.user_id"
@@ -497,17 +497,14 @@ class LoyaltyApi extends REST_Controller {
             $totallikes = $query->result_array();
             $totallikecount = count($totallikes);
 
-            foreach ($images as $key2 => $value2) {
-                $temp = array(
-                    "img" => $imagepath . $value2->file_name,
-                    "index" => $key2,
-                    "id" => $value2->id,
-                );
-                array_push($postimages, $temp);
-            }
-            $value->userlikes = $totallikes;
+
+//            $value->userlikes = $totallikes;
             $value->likes = $totallikecount;
-            $value->images = $postimages;
+            $value->has_image = false;
+            if ($images) {
+                $value->has_image = true;
+                $value->images = $imagepath . $images->file_name;
+            }
             array_push($postdataarray, $value);
         }
         $this->response($postdataarray);
