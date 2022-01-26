@@ -567,12 +567,15 @@ class LoyaltyApi extends REST_Controller {
         $this->db->or_where('usercode', $userinput);
         $query = $this->db->get('app_user');
         $userdata = $query->row();
+        $status = "100";
+        
         if ($userdata) {
             $userpoints = $this->getUserPoints($userdata->id);
+            $status = "200";
         } else {
-            $userpoints = [];
+            $userpoints = array();
         }
-        $this->response(array("userpoints" => $userpoints, "userdata" => $userdata));
+        $this->response(array("userpoints" => $userpoints, "userdata" => $userdata, "status" => $status));
     }
 
     function getUserByMobId_get($userinput) {
