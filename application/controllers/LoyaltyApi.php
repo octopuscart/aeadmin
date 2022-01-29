@@ -339,13 +339,13 @@ class LoyaltyApi extends REST_Controller {
                 "name" => $name,
             );
             $imagepath = base_url() . "assets/profile_image/";
-            $profile_image = $userdata["profile_image"];
+            $profile_image = $userdata->profile_image;
             if ($profile_image) {
                 $profile_image = $imagepath . $profile_image;
             } else {
                 $profile_image = $imagepath . "default.png";
             }
-            $userdata["profile_image"] = $profile_image;
+            $userdata->profile_image = $profile_image;
             $this->db->set($regArray);
             $this->db->where('contact_no', $contact_no); //set column_name and value in which row need to update
             $this->db->update("app_user");
