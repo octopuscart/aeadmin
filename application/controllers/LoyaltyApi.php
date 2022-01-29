@@ -405,7 +405,7 @@ class LoyaltyApi extends REST_Controller {
         $this->db->where('contact_no', $contact_no); //set column_name and value in which row need to update
         $query = $this->db->get('app_user');
         $userData = $query->row();
-        $this->response(array("userdata" => $userData));
+        $this->response(array("userdata" => $userData, "status"=>"200"));
     }
 
     function getUsersCard_get($user_id) {
