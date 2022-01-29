@@ -317,7 +317,7 @@ class LoyaltyApi extends REST_Controller {
         $usercode = rand(1000, 9999);
         $imagepath = base_url() . "assets/profile_image/";
         $profile_image = $imagepath . "default.png";
-        $profile_image = $userdata["profile_image"];
+   
         $profileimageurl = "";
         $regArray = array(
             "name" => $name,
