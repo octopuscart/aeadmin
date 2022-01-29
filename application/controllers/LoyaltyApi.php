@@ -315,6 +315,9 @@ class LoyaltyApi extends REST_Controller {
         $email = "";
         $password = rand(1000, 9999);
         $usercode = rand(1000, 9999);
+        $imagepath = base_url() . "assets/profile_image/";
+        $profile_image = $imagepath . "default.png";
+        $profile_image = $userdata["profile_image"];
         $profileimageurl = "";
         $regArray = array(
             "name" => $name,
@@ -323,7 +326,7 @@ class LoyaltyApi extends REST_Controller {
             "password" => $password,
             "usercode" => $usercode,
             "datetime" => date("Y-m-d H:i:s a"),
-            "profile_image" => $profileimageurl,
+            "profile_image" => $profile_image,
             "cardimage" => "",
         );
         $this->db->where('contact_no', $contact_no);
@@ -335,6 +338,14 @@ class LoyaltyApi extends REST_Controller {
             $regArray = array(
                 "name" => $name,
             );
+            $imagepath = base_url() . "assets/profile_image/";
+            $profile_image = $userdata["profile_image"];
+            if ($profile_image) {
+                $profile_image = $imagepath . $profile_image;
+            } else {
+                $profile_image = $imagepath . "default.png";
+            }
+            $userdata["profile_image"] = $profile_image;
             $this->db->set($regArray);
             $this->db->where('contact_no', $contact_no); //set column_name and value in which row need to update
             $this->db->update("app_user");
@@ -350,6 +361,8 @@ class LoyaltyApi extends REST_Controller {
             $this->db->update("app_user");
             $regArray["usercode"] = $usercode . $last_id;
             $regArray["id"] = $last_id;
+
+
             $this->response(array("status" => "200", "userdata" => $regArray));
         }
     }
@@ -568,7 +581,7 @@ class LoyaltyApi extends REST_Controller {
         $query = $this->db->get('app_user');
         $userdata = $query->row();
         $status = "100";
-        
+
         if ($userdata) {
             $userpoints = $this->getUserPoints($userdata->id);
             $status = "200";
@@ -654,6 +667,21 @@ class LoyaltyApi extends REST_Controller {
 
     function testRend_get() {
         echo rand(1000, 9999);
+    }
+
+    function fileupload_post() {
+
+        $ext1 = explode('.', $_FILES['file']['name']);
+        $ext = strtolower(end($ext1));
+        $filename = $type . rand(1000, 10000);
+
+        $actfilname = $_FILES['file']['name'];
+
+        $filelocation = "assets/profile_image/";
+        move_uploaded_file($_FILES["file"]['tmp_name'], $filelocation . $actfilname);
+
+
+        $this->response(array("status" => "200"));
     }
 
 }
