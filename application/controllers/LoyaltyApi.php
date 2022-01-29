@@ -317,7 +317,7 @@ class LoyaltyApi extends REST_Controller {
         $usercode = rand(1000, 9999);
         $imagepath = base_url() . "assets/profile_image/";
         $profile_image = $imagepath . "default.png";
-   
+
         $profileimageurl = "";
         $regArray = array(
             "name" => $name,
@@ -400,12 +400,21 @@ class LoyaltyApi extends REST_Controller {
         $this->db->set($profiledata);
         $this->db->where('id', $user_id); //set column_name and value in which row need to update
         $this->db->update("app_user");
-        
+
 
         $this->db->where('id', $user_id);  //set column_name and value in which row need to update
         $query = $this->db->get('app_user');
         $userData = $query->row();
-        $this->response(array("userdata" => $userData, "status"=>"200"));
+        $imagepath = base_url() . "assets/profile_image/";
+        $profile_image = $userData->profile_image;
+        if ($profile_image) {
+            $profile_image = $imagepath . $profile_image;
+        } else {
+            $profile_image = $imagepath . "default.png";
+        }
+        $userData->profile_image = $profile_image;
+
+        $this->response(array("userdata" => $userData, "status" => "200"));
     }
 
     function getUsersCard_get($user_id) {
