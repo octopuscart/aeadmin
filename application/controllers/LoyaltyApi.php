@@ -392,6 +392,7 @@ class LoyaltyApi extends REST_Controller {
         $profiledata = array(
             'name' => $this->post('name'),
             'email' => $this->post('email'),
+            'profile_image' => $this->post('profile_image'),
             'contact_no' => $this->post('mobile_no'),
             'company' => $this->post('company'),
             'designation' => $this->post('designation'),
