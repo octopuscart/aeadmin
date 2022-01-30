@@ -590,6 +590,14 @@ class LoyaltyApi extends REST_Controller {
         $this->db->or_where('usercode', $userinput);
         $query = $this->db->get('app_user');
         $userdata = $query->row();
+        $imagepath = base_url() . "assets/profile_image/";
+        $profile_image = $userdata->profile_image;
+        if ($profile_image) {
+            $profile_image = $imagepath . $profile_image;
+        } else {
+            $profile_image = $imagepath . "default.png";
+        }
+        $userdata->profile_image = $profile_image;
         $status = "100";
 
         if ($userdata) {
