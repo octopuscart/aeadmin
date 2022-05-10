@@ -499,6 +499,7 @@ class LoyaltyApi extends REST_Controller {
 
     function getPostData_get($limit = 20, $startpage = 0) {
         $imagepath = base_url() . "assets/postfiles/";
+        $imagepath = "https://loyatycard.varbin.com/assets/postfiles/";
         $this->db->order_by("id desc");
         $this->db->limit($limit, $startpage);
         $query = $this->db->get('post');
