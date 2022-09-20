@@ -647,7 +647,7 @@ class LoyaltyApi extends REST_Controller {
             'user_id' => $this->post('sender_id'),
             "point_type" => "Debit",
         );
-        $last_id = $this->pointManagement($post_data);
+        $last_id = $this->pointManagement($post_data2);
         $this->response(array("last_id" => $last_id));
     }
 
