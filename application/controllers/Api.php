@@ -611,9 +611,11 @@ class Api extends REST_Controller {
             if ($category) {
                 $productobj["category_nav"] = $category["category_string"];
             }
+            
+            $price = $productobj["price"];
 
-            $productobj["price"] = "INR " . number_format($productobj["price"], 2, '.', '');
-            $productobj["fprice"] = number_format($productobj["price"], 2, '.', '');
+            $productobj["price"] = "INR " . number_format($price, 2, '.', '');
+            $productobj["fprice"] = $price;
             array_push($finallist, $productobj);
         }
 
