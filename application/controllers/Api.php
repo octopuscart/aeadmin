@@ -613,7 +613,7 @@ class Api extends REST_Controller {
             }
 
             $productobj["price"] = "INR " . number_format($productobj["price"], 2, '.', '');
-            $productobj["fprice"] = number_format($productobj["price"]);
+            $productobj["fprice"] = number_format($productobj["price"], 2, '.', '');
             array_push($finallist, $productobj);
         }
 
