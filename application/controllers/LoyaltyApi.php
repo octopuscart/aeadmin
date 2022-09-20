@@ -362,7 +362,6 @@ class LoyaltyApi extends REST_Controller {
             $regArray["usercode"] = $usercode . $last_id;
             $regArray["id"] = $last_id;
 
-
             $this->response(array("status" => "200", "userdata" => $regArray));
         }
     }
@@ -400,7 +399,6 @@ class LoyaltyApi extends REST_Controller {
         $this->db->set($profiledata);
         $this->db->where('id', $user_id); //set column_name and value in which row need to update
         $this->db->update("app_user");
-
 
         $this->db->where('id', $user_id);  //set column_name and value in which row need to update
         $query = $this->db->get('app_user');
@@ -492,7 +490,6 @@ class LoyaltyApi extends REST_Controller {
         $this->db->where('id', $pid);
         $this->db->delete('post');
 
-
         $this->db->where('table_id', $pid);
         $this->db->delete('post_files');
     }
@@ -512,7 +509,6 @@ class LoyaltyApi extends REST_Controller {
             $query = $this->db->get('post_files');
             $images = $query->row();
 
-
             $postimages = array();
 
             $queryr = "SELECT pl.datetime, ap.name  as name FROM `post_like` as pl  join app_user as ap on ap.id = pl.user_id"
@@ -520,7 +516,6 @@ class LoyaltyApi extends REST_Controller {
             $query = $this->db->query($queryr);
             $totallikes = $query->result_array();
             $totallikecount = count($totallikes);
-
 
 //            $value->userlikes = $totallikes;
             $value->likes = $totallikecount;
@@ -623,23 +618,49 @@ class LoyaltyApi extends REST_Controller {
         $this->response(array("userpoints" => $userpoints, "userdata" => $userdata));
     }
 
-    function createPoints_post() {
+    function pointManagement($postdata) {
+        $userid = $postdata['user_id'];
+        $this->db->insert('points', $postdata);
+        $last_id = $this->db->insert_id();
+        $points = $postdata['points'];
+        $ctype = $postdata['point_type'];
+        $cctype = $ctype == 'Credit' ? 'Credited' : 'Debited';
+        $message = array("title" => "Loyalty Card Points $cctype", "message" => "Your Card Has Been $cctype With $points Points");
+        $this->singleMessage($message, $userid);
+        return $last_id;
+    }
+
+    function sharePoints_post() {
         $this->config->load('rest', TRUE);
-        $class_assignment = array(
+        $post_data = array(
             'points' => $this->post('points'),
             'description' => $this->post('description'),
             "datetime" => date("Y-m-d H:i:s a"),
             'user_id' => $this->post('user_id'),
             "point_type" => $this->post('point_type'),
         );
-        $userid = $this->post('user_id');
-        $this->db->insert('points', $class_assignment);
-        $last_id = $this->db->insert_id();
-        $points = $this->post('points');
-        $ctype = $this->post('point_type');
-        $cctype = $ctype == 'Credit' ? 'Credited' : 'Debited';
-        $message = array("title" => "Loyalty Card Points $cctype", "message" => "Your Card Has Been $cctype With $points Points");
-        $this->singleMessage($message, $userid);
+        $last_id = $this->pointManagement($post_data);
+        $post_data2 = array(
+            'points' => $this->post('point_debit'),
+            'description' => $this->post('sender_description'),
+            "datetime" => date("Y-m-d H:i:s a"),
+            'user_id' => $this->post('sender_id'),
+            "point_type" => "Debit",
+        );
+        $last_id = $this->pointManagement($post_data);
+        $this->response(array("last_id" => $last_id));
+    }
+
+    function createPoints_post() {
+        $this->config->load('rest', TRUE);
+        $post_data = array(
+            'points' => $this->post('points'),
+            'description' => $this->post('description'),
+            "datetime" => date("Y-m-d H:i:s a"),
+            'user_id' => $this->post('user_id'),
+            "point_type" => $this->post('point_type'),
+        );
+        $last_id = $this->pointManagement($post_data);
         $this->response(array("last_id" => $last_id));
     }
 
@@ -699,7 +720,6 @@ class LoyaltyApi extends REST_Controller {
 
         $filelocation = "assets/profile_image/";
         move_uploaded_file($_FILES["file"]['tmp_name'], $filelocation . $actfilname);
-
 
         $this->response(array("status" => "200"));
     }
