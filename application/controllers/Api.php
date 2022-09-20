@@ -102,10 +102,8 @@ class Api extends REST_Controller {
         $this->config->load('rest', TRUE);
         $bookingarray = $this->post();
 
-
         $cartdata = $this->post("cartdata");
         $cartjson = json_decode($cartdata);
-
 
         $web_order = array(
             'name' => $this->post('name'),
@@ -130,8 +128,6 @@ class Api extends REST_Controller {
             'measurement_style' => '',
             'credit_price' => 0,
         );
-
-
 
         $this->db->insert('user_order', $web_order);
 
@@ -334,7 +330,6 @@ class Api extends REST_Controller {
         $query = $this->db->get('user_order_status');
         $userorderstatus = $query->result();
         $orderdetails['order_status'] = $userorderstatus;
-
 
         $this->response($orderdetails);
     }
@@ -618,7 +613,7 @@ class Api extends REST_Controller {
             }
 
             $productobj["price"] = "INR " . number_format($productobj["price"], 2, '.', '');
-
+            $productobj["fprice"] = number_format($productobj["price"]);
             array_push($finallist, $productobj);
         }
 
