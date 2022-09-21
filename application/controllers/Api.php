@@ -656,6 +656,16 @@ class Api extends REST_Controller {
         $this->response(array("last_id" => $last_id));
     }
 
+    function applyCoupon_get() {
+        $this->db->where("valid_till>=", date("Y-m-d"));
+        $querycoupon = $this->db->get("coupon_conf");
+        $couopndata = [];
+        if ($querycoupon) {
+            $couopndata = $querycoupon->result_array();
+        }
+        $this->response($couopndata);
+    }
+
     function applyCoupon_post() {
         header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE");
         header('Access-Control-Allow-Origin: *');
