@@ -99,7 +99,7 @@ class Api extends REST_Controller {
         $this->response(array("status" => "done"));
     }
 
-    function userAddress_get($user_id) {
+    function shippingAddress_get($user_id) {
         $this->db->where('user_id', $user_id);
         $this->db->order_by('id desc');
         $query = $this->db->get("shipping_address");
