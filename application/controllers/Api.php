@@ -117,7 +117,7 @@ class Api extends REST_Controller {
             'contact_no' => $this->post('contact_no'),
             'user_id' => $this->post('user_id') ? $this->post('user_id') : 'Guest',
             'zipcode' => $this->post('zipcode') ? $this->post('zipcode') : "",
-            'address1' => $this->post('address'),
+            'address1' => $this->post('address1'),
             'address2' => "",
             'city' => "",
             'state' => "",
