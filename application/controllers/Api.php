@@ -99,35 +99,6 @@ class Api extends REST_Controller {
         $this->response(array("status" => "done"));
     }
 
-    function shippingAddress_get($user_id) {
-        $this->db->where('user_id', $user_id);
-        $this->db->order_by('id desc');
-        $query = $this->db->get("shipping_address");
-        $shipping_address = $query->result_array();
-        $this->response($shipping_address);
-    }
-
-    function shippingAddress_post() {
-        header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE");
-        header('Access-Control-Allow-Origin: *');
-        $this->config->load('rest', TRUE);
-        $shippingAddress = array(
-            'name' => $this->post('name'),
-            'email' => $this->post('email'),
-            'contact_no' => $this->post('contact_no'),
-            'user_id' => $this->post('user_id') ? $this->post('user_id') : 'Guest',
-            'zipcode' => $this->post('zipcode') ? $this->post('zipcode') : "",
-            'address1' => $this->post('address1'),
-            'address2' => "",
-            'city' => "",
-            'state' => "",
-            'country' => "",
-        );
-        $this->db->insert('shipping_address', $shippingAddress);
-        $last_id = $this->db->insert_id();
-        $this->response(array("last_id" => $last_id));
-    }
-
     //Mobile Booking APi
     function orderFromMobile_post() {
         header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE");
@@ -654,6 +625,83 @@ class Api extends REST_Controller {
         }
 
         $this->response($finallist);
+    }
+
+    function shippingAddress_get($user_id) {
+        $this->db->where('user_id', $user_id);
+        $this->db->order_by('id desc');
+        $query = $this->db->get("shipping_address");
+        $shipping_address = $query->result_array();
+        $this->response($shipping_address);
+    }
+
+    function shippingAddress_post() {
+        header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE");
+        header('Access-Control-Allow-Origin: *');
+        $this->config->load('rest', TRUE);
+        $shippingAddress = array(
+            'name' => $this->post('name'),
+            'email' => $this->post('email'),
+            'contact_no' => $this->post('contact_no'),
+            'user_id' => $this->post('user_id') ? $this->post('user_id') : 'Guest',
+            'zipcode' => $this->post('zipcode') ? $this->post('zipcode') : "",
+            'address1' => $this->post('address1'),
+            'address2' => "",
+            'city' => "",
+            'state' => "",
+            'country' => "",
+        );
+        $this->db->insert('shipping_address', $shippingAddress);
+        $last_id = $this->db->insert_id();
+        $this->response(array("last_id" => $last_id));
+    }
+
+    function applyCoupon_post() {
+        header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE");
+        header('Access-Control-Allow-Origin: *');
+        $this->config->load('rest', TRUE);
+        $total_amount = $this->post("total_amount");
+        $couponcode = $this->post("couponcode");
+        $couponarray = array(
+            "has_coupon" => 0,
+            "coupon_code" => "",
+            "coupon_discount" => "0",
+            "coupon_discount_type" => "",
+            "coupon_message" => "",
+        );
+        if ($couponcode) {
+            $this->db->where("code", $couponcode);
+            $this->db->where("valid_till>=", date("Y-m-d"));
+            $querycoupon = $this->db->get("coupon_conf");
+            if ($querycoupon) {
+                $couopndata = $querycoupon->row_array();
+                if ($couopndata) {
+                    if ($couopndata["coupon_type"] == "All User") {
+                        $couponarray["has_coupon"] = 1;
+                        $couponarray["coupon_code"] = $couponcode;
+                        $couponarray["coupon_discount"] = $couopndata["value"];
+                        $couponarray["coupon_discount_type"] = $couopndata["value_type"];
+                        $couponarray["coupon_message"] = $couopndata["promotion_message"];
+                    } else {
+                        $exitcoupon = $this->db->where("coupon_code", $couponcode)->get("user_order");
+                        if ($exitcoupon && $exitcoupon->result_array()) {
+                            
+                        } else {
+                            $couponarray["has_coupon"] = 1;
+                            $couponarray["coupon_code"] = $couponcode;
+                            $couponarray["coupon_discount"] = $couopndata["value"];
+                            $couponarray["coupon_discount_type"] = $couopndata["value_type"];
+                            $couponarray["coupon_message"] = $couopndata["promotion_message"];
+                        }
+                    }
+                }
+            }
+        }
+        if ($couponarray["coupon_discount_type"] == "Fixed") {
+            $dicountvalue = ($total_amount * $couponarray["coupon_discount"]) / 100;
+            $couponarray["coupon_discount"] = $dicountvalue;
+        }
+        $this->response($couponarray);
     }
 
 }
