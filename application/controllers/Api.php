@@ -502,7 +502,7 @@ class Api extends REST_Controller {
         $this->db->insert('web_enquiry', $enquiry);
     }
 
-    function shippingAmt_get() {
+    function shippingAmt_get($zipcode) {
         $this->config->load('rest', TRUE);
         header('Access-Control-Allow-Origin: *');
         header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, DELETE");
