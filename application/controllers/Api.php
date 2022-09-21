@@ -94,6 +94,35 @@ class Api extends REST_Controller {
         $this->response(array("status" => "done"));
     }
 
+    function userAddress_get($user_id) {
+        $this->db->where('user_id', $user_id);
+        $this->db->order_by('id desc');
+        $query = $this->db->get("shipping_address");
+        $shipping_address = $query->result_array();
+        $this->response($shipping_address);
+    }
+
+    function shippingAddress_post() {
+        header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE");
+        header('Access-Control-Allow-Origin: *');
+        $this->config->load('rest', TRUE);
+        $shippingAddress = array(
+            'name' => $this->post('name'),
+            'email' => $this->post('email'),
+            'contact_no' => $this->post('contact_no'),
+            'user_id' => $this->post('user_id') ? $this->post('user_id') : 'Guest',
+            'zipcode' => $this->post('zipcode') ? $this->post('zipcode') : "",
+            'address1' => $this->post('address'),
+            'address2' => "",
+            'city' => "",
+            'state' => "",
+            'country' => "",
+        );
+        $this->db->insert('shipping_address', $shippingAddress);
+        $last_id = $this->db->insert_id();
+        $this->response(array("last_id" => $last_id));
+    }
+
     //Mobile Booking APi
     function orderFromMobile_post() {
         header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE");
@@ -110,7 +139,7 @@ class Api extends REST_Controller {
             'email' => $this->post('email'),
             'contact_no' => $this->post('contact_no'),
             'user_id' => $this->post('user_id') ? $this->post('user_id') : 'Guest',
-            'zipcode' => "",
+            'zipcode' => $this->post('zipcode') ? $this->post('zipcode') : "",
             'address1' => $this->post('address'),
             'address2' => "",
             'city' => "",
@@ -611,7 +640,7 @@ class Api extends REST_Controller {
             if ($category) {
                 $productobj["category_nav"] = $category["category_string"];
             }
-            
+
             $price = $productobj["price"];
 
             $productobj["price"] = "INR " . number_format($price, 2, '.', '');
