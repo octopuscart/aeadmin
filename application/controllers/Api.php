@@ -697,7 +697,7 @@ class Api extends REST_Controller {
                 }
             }
         }
-        if ($couponarray["coupon_discount_type"] == "Fixed") {
+        if ($couponarray["coupon_discount_type"] == "Percent") {
             $dicountvalue = ($total_amount * $couponarray["coupon_discount"]) / 100;
             $couponarray["coupon_discount"] = $dicountvalue;
         }
