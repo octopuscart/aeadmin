@@ -99,88 +99,6 @@ class Api extends REST_Controller {
         $this->response(array("status" => "done"));
     }
 
-    //Mobile Booking APi
-    function orderFromMobile_post() {
-        header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE");
-        header('Access-Control-Allow-Origin: *');
-
-        $this->config->load('rest', TRUE);
-        $bookingarray = $this->post();
-
-        $cartdata = $this->post("cartdata");
-        $cartjson = json_decode($cartdata);
-
-        $web_order = array(
-            'name' => $this->post('name'),
-            'email' => $this->post('email'),
-            'contact_no' => $this->post('contact_no'),
-            'user_id' => $this->post('user_id') ? $this->post('user_id') : 'Guest',
-            'zipcode' => $this->post('zipcode') ? $this->post('zipcode') : "",
-            'address1' => $this->post('address'),
-            'address2' => "",
-            'city' => "",
-            'state' => "",
-            'country' => "",
-            'order_date' => date('Y-m-d'),
-            'order_time' => date('H:i:s'),
-            'amount_in_word' => $this->Order_model->convert_num_word($this->post('total')),
-            'sub_total_price' => $this->post('sub_total'),
-            'total_price' => $this->post('total'),
-            'total_quantity' => $this->post('quantity'),
-            'shipping_price' => "30",
-            'status' => 'Order Confirmed',
-            'payment_mode' => "Cash on delivery",
-            'measurement_style' => '',
-            'credit_price' => 0,
-        );
-
-        $this->db->insert('user_order', $web_order);
-
-        $last_id = $this->db->insert_id();
-        $oderid = $last_id;
-
-        $orderno = "AM" . date('Y/m/d') . "/" . $last_id;
-        $orderkey = md5($orderno);
-        $this->db->set('order_no', $orderno);
-        $this->db->set('order_key', $orderkey);
-        $this->db->where('id', $last_id);
-        $this->db->update('user_order');
-
-        $order_status_data = array(
-            'c_date' => date('Y-m-d'),
-            'c_time' => date('H:i:s'),
-            'order_id' => $last_id,
-            'status' => "Order Confirmed",
-            'user_id' => $this->post('user_id') ? $this->post('user_id') : 'Guest',
-            'remark' => "Order Confirmed By Using COD,  Waiting For Payment",
-        );
-        $this->db->insert('user_order_status', $order_status_data);
-
-        foreach ($cartjson as $key => $value) {
-
-
-
-            $product_dict = array(
-                'title' => $value->title,
-                'price' => $value->price,
-                'sku' => $value->sku,
-                'attrs' => "",
-                'vendor_id' => "",
-                'total_price' => $value->total_price,
-                'file_name' => base_url() . 'assets/product_images/' . $value->file_name,
-                'quantity' => $value->quantity,
-                'user_id' => $value->title,
-                'credit_limit' => 0,
-                'order_id' => $last_id,
-                'product_id' => '',
-                'op_date_time' => date('Y-m-d H:i:s'),
-            );
-
-            $this->db->insert('cart', $product_dict);
-        }
-        $this->response(array("order_id" => $oderid));
-    }
-
     function registration_post() {
         $this->config->load('rest', TRUE);
         header('Access-Control-Allow-Origin: *');
@@ -713,6 +631,171 @@ class Api extends REST_Controller {
         }
         $couponarray["coupon_discount"] = number_format($couponarray["coupon_discount"], 2, '.', '');
         $this->response($couponarray);
+    }
+
+    //Mobile Booking APi
+    function orderFromMobile_post() {
+        header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE");
+        header('Access-Control-Allow-Origin: *');
+
+        $this->config->load('rest', TRUE);
+        $bookingarray = $this->post();
+
+        $cartdata = $this->post("cartdata");
+        $cartjson = json_decode($cartdata);
+
+        $web_order = array(
+            'name' => $this->post('name'),
+            'email' => $this->post('email'),
+            'contact_no' => $this->post('contact_no'),
+            'user_id' => $this->post('user_id') ? $this->post('user_id') : 'Guest',
+            'zipcode' => $this->post('zipcode') ? $this->post('zipcode') : "",
+            'address1' => $this->post('address'),
+            'address2' => "",
+            'city' => "",
+            'state' => "",
+            'country' => "",
+            'order_date' => date('Y-m-d'),
+            'order_time' => date('H:i:s'),
+            'amount_in_word' => $this->Order_model->convert_num_word($this->post('total')),
+            'sub_total_price' => $this->post('sub_total'),
+            'total_price' => $this->post('total'),
+            'total_quantity' => $this->post('quantity'),
+            'shipping' => "30",
+            'status' => 'Order Confirmed',
+            'payment_mode' => "Cash on delivery",
+            'measurement_style' => '',
+            'credit_price' => 0,
+            'coupon_code' => $this->post('coupon_code') ? $this->post('coupon_code') : "",
+            'discount' => $this->post('discount') ? $this->post('discount') : "",
+            'measurement_id' => "",
+        );
+
+        $this->db->insert('user_order', $web_order);
+
+        $last_id = $this->db->insert_id();
+        $oderid = $last_id;
+
+        $orderno = "AM" . date('Y/m/d') . "/" . $last_id;
+        $orderkey = md5($orderno);
+        $this->db->set('order_no', $orderno);
+        $this->db->set('order_key', $orderkey);
+        $this->db->where('id', $last_id);
+        $this->db->update('user_order');
+
+        $order_status_data = array(
+            'c_date' => date('Y-m-d'),
+            'c_time' => date('H:i:s'),
+            'order_id' => $last_id,
+            'status' => "Order Confirmed",
+            'user_id' => $this->post('user_id') ? $this->post('user_id') : 'Guest',
+            'remark' => "Order Confirmed By Using COD,  Waiting For Payment",
+        );
+        $this->db->insert('user_order_status', $order_status_data);
+
+        foreach ($cartjson as $key => $value) {
+            $product_dict = array(
+                'title' => $value->title,
+                'price' => $value->price,
+                'sku' => $value->sku,
+                'attrs' => "",
+                'vendor_id' => "",
+                'total_price' => $value->total_price,
+                'file_name' => base_url() . 'assets/product_images/' . $value->file_name,
+                'quantity' => $value->quantity,
+                'user_id' => $value->title,
+                'credit_limit' => 0,
+                'order_id' => $last_id,
+                'product_id' => '',
+                'op_date_time' => date('Y-m-d H:i:s'),
+            );
+
+            $this->db->insert('cart', $product_dict);
+        }
+        $this->response(array("order_id" => $oderid));
+    }
+
+    //Mobile Booking APi
+    function orderFromApp_post() {
+        header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE");
+        header('Access-Control-Allow-Origin: *');
+
+        $this->config->load('rest', TRUE);
+        $orderArray = $this->post();
+        print_r($orderArray);
+
+        $cartdata = $this->post("cartdata");
+
+      
+        $order_array = array(
+            'name' => $this->post('name'),
+            'email' => $this->post('email'),
+            'contact_no' => $this->post('contact_no'),
+            'user_id' => $this->post('user_id') ? $this->post('user_id') : 'Guest',
+            'zipcode' => $this->post('zipcode') ? $this->post('zipcode') : "",
+            'address1' => $this->post('address'),
+            'address2' => "",
+            'city' => "",
+            'state' => "",
+            'country' => "",
+            'order_date' => date('Y-m-d'),
+            'order_time' => date('H:i:s'),
+            'amount_in_word' => $this->Order_model->convert_num_word($this->post('total')),
+            'sub_total_price' => $this->post('sub_total'),
+            'total_price' => $this->post('total'),
+            'total_quantity' => $this->post('quantity'),
+            'coupon_code' => $this->post('coupon_code') ? $this->post('coupon_code') : "",
+            'discount' => $this->post('discount') ? $this->post('discount') : "",
+            'shipping' => $this->post('shipping') ? $this->post('shipping') : "30",
+            'status' => 'Order Confirmed',
+            'payment_mode' => "Cash on delivery",
+            'measurement_style' => '',
+            'credit_price' => 0,
+            'measurement_id' => "",
+        );
+
+        $this->db->insert('user_order', $order_array);
+
+        $last_id = $this->db->insert_id();
+        $oderid = $last_id;
+
+        $orderno = "AM" . date('Y/m/d') . "/" . $last_id;
+        $orderkey = md5($orderno);
+        $this->db->set('order_no', $orderno);
+        $this->db->set('order_key', $orderkey);
+        $this->db->where('id', $last_id);
+        $this->db->update('user_order');
+
+        $order_status_data = array(
+            'c_date' => date('Y-m-d'),
+            'c_time' => date('H:i:s'),
+            'order_id' => $last_id,
+            'status' => "Order Confirmed",
+            'user_id' => $this->post('user_id') ? $this->post('user_id') : 'Guest',
+            'remark' => "Order Confirmed By Using COD,  Waiting For Payment",
+        );
+        $this->db->insert('user_order_status', $order_status_data);
+
+        foreach ($cartdata as $key => $value) {
+            $product_dict = array(
+                'title' => $value["title"],
+                'price' => $value["price"],
+                'sku' => $value["sku"],
+                'attrs' => "",
+                'vendor_id' => "",
+                'total_price' => $value["total_price"],
+                'file_name' =>  $value["image"],
+                'quantity' => $value["quantity"],
+                'user_id' => $value["title"],
+                'credit_limit' => "0",
+                'order_id' => $last_id,
+                'product_id' => '',
+                'op_date_time' => date('Y-m-d H:i:s'),
+            );
+
+            $this->db->insert('cart', $product_dict);
+        }
+        $this->response(array("order_id" => $oderid));
     }
 
 }
