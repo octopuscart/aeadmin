@@ -793,7 +793,7 @@ class Api extends REST_Controller {
 
             $this->db->insert('cart', $product_dict);
         }
-        $this->response(array("order_id" => $oderid));
+        $this->response(array("order_key" => $orderkey));
     }
 
     function userOrders_get($user_id) {
@@ -814,8 +814,8 @@ class Api extends REST_Controller {
         $this->response($tempdata);
     }
 
-    function userOrderSingle_get($order_id) {
-        $this->db->where('id', $order_id);
+    function userOrderSingle_get($order_key) {
+        $this->db->where('order_key', $order_key);
         $query = $this->db->get('user_order');
         $orderData = $query->row_array();
         $this->db->where('order_id', $orderData['id']);
