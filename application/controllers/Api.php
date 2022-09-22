@@ -722,7 +722,6 @@ class Api extends REST_Controller {
 
         $this->config->load('rest', TRUE);
         $orderArray = $this->post();
-        print_r($orderArray);
 
         $cartdata = $this->post("cartdata");
 
