@@ -711,6 +711,7 @@ class Api extends REST_Controller {
             $dicountvalue = ($total_amount * $couponarray["coupon_discount"]) / 100;
             $couponarray["coupon_discount"] = $dicountvalue;
         }
+        $couponarray["coupon_discount"] = number_format($couponarray["coupon_discount"], 2, '.', '');
         $this->response($couponarray);
     }
 
