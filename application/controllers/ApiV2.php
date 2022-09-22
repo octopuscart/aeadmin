@@ -725,6 +725,7 @@ class Api extends REST_Controller {
 
         $cartdata = $this->post("cartdata");
 
+      
         $order_array = array(
             'name' => $this->post('name'),
             'email' => $this->post('email'),
@@ -782,7 +783,7 @@ class Api extends REST_Controller {
                 'attrs' => "",
                 'vendor_id' => "",
                 'total_price' => $value["total_price"],
-                'file_name' => $value["image"],
+                'file_name' =>  $value["image"],
                 'quantity' => $value["quantity"],
                 'user_id' => $value["title"],
                 'credit_limit' => "0",
@@ -794,35 +795,6 @@ class Api extends REST_Controller {
             $this->db->insert('cart', $product_dict);
         }
         $this->response(array("order_id" => $oderid));
-    }
-
-    function userOrders_get($user_id) {
-        $this->db->order_by('id', 'desc');
-        $this->db->where('user_id', $user_id);
-        $query = $this->db->get('user_order');
-        $systemlog = $query->result_array();
-        $tempdata = [];
-        foreach ($systemlog as $key => $value) {
-
-            $this->db->where('order_id', $value['id']);
-            $query = $this->db->get('cart');
-            $cartdata = $query->result();
-            $value['cart'] = $cartdata;
-
-            array_push($tempdata, $value);
-        }
-        $this->response($tempdata);
-    }
-
-    function userOrderSingle_get($order_id) {
-        $this->db->where('id', $order_id);
-        $query = $this->db->get('user_order');
-        $orderData = $query->row_array();
-        $this->db->where('order_id', $orderData['id']);
-        $query = $this->db->get('cart');
-        $cartdata = $query->result();
-        $orderData['cart'] = $cartdata;
-        $this->response($orderData);
     }
 
 }
