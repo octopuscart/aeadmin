@@ -586,7 +586,7 @@ class LoyaltyApi extends REST_Controller {
         $this->response($userpoints);
     }
 
-    function getUserByMobCod_get($userinput) {
+    function getUserByMobCod($userinput) {
         $this->db->where('contact_no', $userinput);
         $this->db->or_where('usercode', $userinput);
         $query = $this->db->get('app_user');
@@ -608,7 +608,11 @@ class LoyaltyApi extends REST_Controller {
         } else {
             $userpoints = array();
         }
-        $this->response(array("userpoints" => $userpoints, "userdata" => $userdata, "status" => $status));
+        return (array("userpoints" => $userpoints, "userdata" => $userdata, "status" => $status));
+    }
+
+    function getUserByMobCod_get($userinput) {
+        $this->response($this->getUserByMobCod($userinput));
     }
 
     function getUserByMobId_get($userinput) {
@@ -727,6 +731,84 @@ class LoyaltyApi extends REST_Controller {
         move_uploaded_file($_FILES["file"]['tmp_name'], $filelocation . $actfilname);
 
         $this->response(array("status" => "200"));
+    }
+
+    function getRecentCustomers() {
+        
+    }
+
+    function getCustomerList_get($limit = 20, $startpage = 0) {
+        $customer_query = "select *from app_user order by id desc limit $startpage, $limit";
+        $query = $this->db->query($customer_query);
+        $finallist = [];
+        if ($query) {
+            $customerdata = $query->result();
+            foreach ($customerdata as $key => $userdata) {
+                $imagepath = base_url() . "assets/profile_image/";
+                $profile_image = $userdata->profile_image;
+                if ($profile_image) {
+                    $profile_image = $imagepath . $profile_image;
+                } else {
+                    $profile_image = $imagepath . "default.png";
+                }
+                $userdata->profile_image = $profile_image;
+
+                array_push($finallist, $userdata);
+            }
+        }
+        $this->response($finallist);
+    }
+
+    function getDashbordData_get() {
+        //Total users
+        $this->db->select("count(id) as total_users");
+        $query = $this->db->get("app_user");
+        $customer_query = $query->row();
+        $total_users = $customer_query ? $customer_query->total_users : 0;
+
+        //Total points
+        $this->db->select("sum(points) as total_points, point_type");
+        $this->db->group_by("point_type");
+        $query = $this->db->get("points");
+        $total_points = $query->result();
+
+        //Recent Users
+        $this->db->order_by('id', 'desc');
+        $this->db->limit(10);
+        $query = $this->db->get('app_user');
+        $recent_users = $query->result();
+
+        //Total Orders
+        $this->db->select("count(id) as total_orders");
+        $query = $this->db->get('user_order');
+        $total_orders_q = $query->row();
+        $total_orders = $total_orders_q ? $total_orders_q->total_orders : 0;
+
+        $dashboardData = array(
+            "total_user" => $total_users,
+            "total_points" => $total_points,
+            "total_orders" => $total_orders,
+            "recent_users" => $recent_users
+        );
+
+        $this->response($dashboardData);
+    }
+
+    function userOrders_get() {
+        $this->db->order_by('id', 'desc');
+        $query = $this->db->get('user_order');
+        $systemlog = $query->result_array();
+        $tempdata = [];
+        foreach ($systemlog as $key => $value) {
+
+            $this->db->where('order_id', $value['id']);
+            $query = $this->db->get('cart');
+            $cartdata = $query->result();
+            $value['cart'] = $cartdata;
+
+            array_push($tempdata, $value);
+        }
+        $this->response($tempdata);
     }
 
 }
